@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-frontend
+  template:
+    metadata:
+      labels:
+        app: react-frontend
+    spec:
+      containers:
+      - name: react-frontend
+        image: ####
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      imagePullSecrets:  
+      - name: ocirsecret  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-frontend-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: javabot-springboot
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-cluster
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "backend.romongo.uk"
+    http:
+      paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: javabot-springboot-service
+              port:
+                number: 8080
+  - host: "frontend.romongo.uk"
+    http:
+      paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: react-frontend-service
+              port:
+                number: 8080
+## RECUERDA SI QUIERES HACER LLAMADAS A OTRO CLUSER IP DENTRO DEL MISMO NAMESPACE: http://<myservice>.svc.cluster.local:SERVICEPORT
+# ejemplo que ya probe desde una pod http://javabot-springboot-service:8080/demo/all
