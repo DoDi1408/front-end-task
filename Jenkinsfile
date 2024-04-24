@@ -8,6 +8,7 @@ pipeline {
         stage('Building with vite'){
             steps{
                 script{
+                    sh 'npm install'
                     sh "npm run build"
                 }
             }
