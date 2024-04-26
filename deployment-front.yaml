@@ -42,7 +42,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: "backend.romongo.uk"
+  - host: "api.romongo.uk"
     http:
       paths:
         - pathType: Prefix
