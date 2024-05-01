@@ -1,12 +1,11 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { NavBar } from "../components/navBar";
 
 export default function Root() {
   return (
     <>
-      <div id="sidebar" className="flex bg-red-400 w-full">
-        NAVBAR AGREGENME LOL
-      </div>
-      <div id="detail">
+      <NavBar />
+      <div id="detail" className="bg-[#F4F3F2] w-full h-screen">
         <Outlet />
       </div>
     </>
