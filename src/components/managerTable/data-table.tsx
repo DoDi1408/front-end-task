@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ComboboxDemo } from "@/components/filterByEmployee";
 
 import {
   ColumnDef,
@@ -45,7 +46,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 justify-between">
         <Input
           placeholder="Filter tasks..."
           value={
@@ -56,6 +57,7 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm bg-white"
         />
+        <ComboboxDemo />
       </div>
       <div className="rounded-md border bg-white">
         <Table>

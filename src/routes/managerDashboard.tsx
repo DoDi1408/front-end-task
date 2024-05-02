@@ -1,5 +1,3 @@
-import React from "react";
-
 import { DataTable } from "../components/managerTable/data-table";
 import { Payment, columns } from "../components/managerTable/columns";
 
