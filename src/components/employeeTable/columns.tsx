@@ -1,12 +1,10 @@
-"use client";
-
+// columns.tsx (remove useState and Dialog import)
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import {
   MoreHorizontal,
   Clock,
   CheckCircle,
-  XCircle,
   Trash2,
   CircleEllipsis,
 } from "lucide-react";
@@ -25,6 +23,7 @@ export type Payment = {
   date: string;
   taskName: string;
   status: "pending" | "In progress" | "completed" | "deleted";
+  description?: string;
 };
 
 const statusIconMap = {
@@ -63,12 +62,16 @@ export const columns: ColumnDef<Payment>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as keyof typeof statusIconMap;
-      return statusIconMap[status] || <XCircle />;
+      return statusIconMap[status] || null;
     },
   },
   {
     accessorKey: "date",
     header: "Due Date",
+  },
+  {
+    id: "viewDescription",
+    header: "Description",
   },
   {
     id: "actions",
