@@ -2,7 +2,14 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
-import { MoreHorizontal } from "lucide-react";
+import {
+  MoreHorizontal,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  CircleEllipsis,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,14 +18,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+
 export type Payment = {
   id: string;
   date: string;
   name: string;
   taskName: string;
   status: "pending" | "In progress" | "completed" | "deleted";
+};
+
+const statusIconMap = {
+  pending: <Clock className="text-yellow-500" />,
+  "In progress": <CircleEllipsis className="text-blue-500" />,
+  completed: <CheckCircle className="text-green-500" />,
+  deleted: <Trash2 className="text-red-500" />,
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -29,6 +42,10 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as keyof typeof statusIconMap;
+      return statusIconMap[status] || <XCircle />;
+    },
   },
   {
     accessorKey: "name",
