@@ -57,7 +57,10 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm bg-white"
         />
-        <ComboboxDemo />
+        <div className="flex items-center">
+          <p className="font-bold me-3">Filter by employee</p>
+          <ComboboxDemo />
+        </div>
       </div>
       <div className="rounded-md border bg-white">
         <Table>
