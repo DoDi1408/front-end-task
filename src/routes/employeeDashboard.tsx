@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { DataTable } from "../components/employeeTable/data-table";
 import { Payment, columns } from "../components/employeeTable/columns";
 import { Button } from "../components/ui/button";
+import axios from "axios";
+import { type Tasks } from "@/lib/types";
+
 import {
   Dialog,
   DialogContent,
@@ -11,40 +14,35 @@ import {
 } from "@/components/ui/dialog";
 import { ColumnDef } from "@tanstack/react-table";
 
-const data: Payment[] = [
-  {
-    id: "728ed5s2f",
-    date: "2 de Julio",
-    taskName: "CI Flow",
-    status: "pending",
-    description: "Configure the CI pipeline for the project.",
-  },
-  {
-    id: "728e3d5s2f",
-    date: "5 de Julio",
-    taskName: "CD Pipeline",
-    status: "completed",
-    description: "Implement the CD pipeline for the deployment.",
-  },
-  {
-    id: "728ed5s2f",
-    date: "2 de Julio",
-    taskName: "Build Blast",
-    status: "deleted",
-    description: "Blast the builds and deploy.",
-  },
-  {
-    id: "728e3d5s2f",
-    date: "5 de Julio",
-    taskName: "Deploy Dash",
-    status: "In progress",
-    description: "Setup the deployment dashboard.",
-  },
-];
-
 const EmployeeDashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Payment | null>(null);
+  const [data, setData] = useState<Tasks>();
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/employee/22/tasks"
+      );
+
+      setData(
+        response.data.map((task) => ({
+          id: task.id,
+          description: task.description,
+          stateTask: task.stateTask,
+          dueDate: task.dueDate,
+          startDate: task.startDate,
+        }))
+      );
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   const columnsWithDialog: ColumnDef<Payment>[] = columns.map((column) => {
     if (column.id === "viewDescription") {
