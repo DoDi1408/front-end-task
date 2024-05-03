@@ -21,9 +21,9 @@ import {
 import { TasksManager } from "@/lib/types";
 
 const statusIconMap = {
-  0: <Clock className="text-yellow-500" />,
-  1: <CircleEllipsis className="text-blue-500" />,
-  2: <CheckCircle className="text-green-500" />,
+  0: <CircleEllipsis className="text-blue-500" />, // Todo
+  1: <Clock className="text-yellow-500" />, // IN progress
+  2: <CheckCircle className="text-green-500" />, // completed
   3: <Trash2 className="text-red-500" />,
 };
 
