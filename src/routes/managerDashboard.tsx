@@ -67,7 +67,7 @@ const ManagerDashboard = () => {
             employee: { firstName: string; lastname: string };
           }
         ) => {
-          const employeeName = `${task?.employee?.firstName} ${task?.employee?.firstName}`;
+          const employeeName = `${task?.employee?.firstName} ${task?.employee?.lastname}`;
           if (!seenEmployees.has(employeeName)) {
             seenEmployees.add(employeeName);
             newEmployeeList.push({
