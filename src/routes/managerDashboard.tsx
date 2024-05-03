@@ -64,10 +64,10 @@ const ManagerDashboard = () => {
       response.data.forEach(
         (
           task: TasksManager & {
-            employee: { firstName: string; lastname: string };
+            employee: { firstName: string; lastName: string };
           }
         ) => {
-          const employeeName = `${task?.employee?.firstName} ${task?.employee?.lastname}`;
+          const employeeName = `${task?.employee?.firstName} ${task?.employee?.lastName}`;
           if (!seenEmployees.has(employeeName)) {
             seenEmployees.add(employeeName);
             newEmployeeList.push({
@@ -82,14 +82,14 @@ const ManagerDashboard = () => {
         response.data.map(
           (
             task: TasksManager & {
-              employee: { firstName: string; lastname: string };
+              employee: { firstName: string; lastName: string };
             }
           ) => ({
             id: task?.id,
             description: task?.description,
             stateTask: task?.stateTask,
-            dueDate: task?.dueDate,
-            employeeName: `${task?.employee?.firstName} ${task?.employee?.lastname}`,
+            dueDate: task?.dueDate.substring(0, 10),
+            employeeName: `${task?.employee?.firstName} ${task?.employee?.lastName}`,
           })
         )
       );

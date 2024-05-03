@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
+import axios from "axios";
 import { Tasks } from "@/lib/types";
 
 const statusIconMap = {
@@ -39,14 +39,17 @@ function ConfirmationCheckboxCell({
   row: { original: Tasks[number] };
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [taskComplete, setTaskComplete] = useState(
-    row.original.stateTask === 2
-  );
+  const taskComplete = row.original.stateTask === 2;
 
-  const completeTask = () => {
-    row.original.stateTask = 2;
-    setTaskComplete(true);
-    setConfirmOpen(false);
+  const completeTask = async () => {
+    const res = await axios({
+      method: "put",
+      url: `https://api.romongo.uk/tasks/${row.original.id.toString()}/updateTask?state=2`,
+    });
+
+    if (res.status == 200) {
+      window.location.reload();
+    }
   };
 
   return (
