@@ -89,7 +89,7 @@ const ManagerDashboard = () => {
             description: task?.description,
             stateTask: task?.stateTask,
             dueDate: task?.dueDate,
-            employeeName: `${task?.employee?.firstName} ${task?.employee?.firstName}`,
+            employeeName: `${task?.employee?.firstName} ${task?.employee?.lastname}`,
           })
         )
       );

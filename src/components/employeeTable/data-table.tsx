@@ -49,10 +49,10 @@ export function DataTable<TData, TValue>({
         <Input
           placeholder="Filter tasks..."
           value={
-            (table.getColumn("taskName")?.getFilterValue() as string) ?? ""
+            (table.getColumn("description")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("taskName")?.setFilterValue(event.target.value)
+            table.getColumn("description")?.setFilterValue(event.target.value)
           }
           className="max-w-sm bg-white"
         />
