@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,16 @@ import logo from "../assets/logoimage.png";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState<string>("");
 
   const login = () => {
-    localStorage.setItem("userId", "22");
-    navigate("/manager");
+    if (email === "manager@oracle.com") {
+      localStorage.setItem("userId", "22");
+      navigate("/manager");
+    } else if (email === "employee@oracle.com") {
+      localStorage.setItem("userId", "22");
+      navigate("/employee");
+    }
   };
 
   return (
@@ -26,7 +33,12 @@ const Login = () => {
             <Label htmlFor="email" className="mb-1">
               Email
             </Label>
-            <Input type="email" id="email" placeholder="Email" />
+            <Input
+              type="email"
+              id="email"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <Button className="bg-red-500" onClick={login}>
             Login

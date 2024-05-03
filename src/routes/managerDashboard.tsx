@@ -36,7 +36,7 @@ const ManagerDashboard = () => {
   return (
     <>
       <h1 className="font-bold text-3xl py-5 text-center">
-        Tareas Equipo: Devops
+        Team Tasks: SQL Infrastructure
       </h1>
       <div className="container mx-auto py-5">
         <DataTable columns={columns} data={data} />
