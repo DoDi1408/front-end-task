@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataTable } from "../components/employeeTable/data-table";
-import { Payment, columns } from "../components/employeeTable/columns";
+import { columns } from "../components/employeeTable/columns";
 import { Button } from "../components/ui/button";
 import axios from "axios";
 import { type Tasks } from "@/lib/types";
@@ -16,7 +16,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 const EmployeeDashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Payment | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Tasks[number] | null>(null);
   const [data, setData] = useState<Tasks>();
 
   const fetchTasks = async () => {
@@ -26,12 +26,12 @@ const EmployeeDashboard = () => {
       );
 
       setData(
-        response.data.map((task) => ({
-          id: task.id,
-          description: task.description,
-          stateTask: task.stateTask,
-          dueDate: task.dueDate,
-          startDate: task.startDate,
+        response.data.map((task: Tasks[number]) => ({
+          id: task?.id,
+          description: task?.description,
+          stateTask: task?.stateTask,
+          dueDate: task?.dueDate,
+          startDate: task?.startDate,
         }))
       );
       console.log(response);
@@ -44,36 +44,38 @@ const EmployeeDashboard = () => {
     fetchTasks();
   }, []);
 
-  const columnsWithDialog: ColumnDef<Payment>[] = columns.map((column) => {
-    if (column.id === "viewDescription") {
-      return {
-        ...column,
-        cell: ({ row }: { row: { original: Payment } }) => (
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSelectedTask(row.original);
-              setDialogOpen(true);
-            }}
-          >
-            View
-          </Button>
-        ),
-      };
+  const columnsWithDialog: ColumnDef<Tasks[number]>[] = columns.map(
+    (column) => {
+      if (column.id === "viewDescription") {
+        return {
+          ...column,
+          cell: ({ row }: { row: { original: Tasks[number] } }) => (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedTask(row.original);
+                setDialogOpen(true);
+              }}
+            >
+              View
+            </Button>
+          ),
+        };
+      }
+      return column;
     }
-    return column;
-  });
+  );
 
   return (
     <>
-      <h1 className="font-bold text-3xl py-5 text-center">Tasks</h1>
+      <h1 className="font-bold text-3xl py-5 text-center">My Tasks</h1>
       <div className="container mx-auto py-5">
-        <DataTable columns={columnsWithDialog} data={data} />
+        <DataTable columns={columnsWithDialog} data={data ?? []} />
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedTask?.taskName}</DialogTitle>
+            <DialogTitle>{selectedTask?.description}</DialogTitle>
             <DialogDescription>
               {selectedTask?.description || "No description available"}
             </DialogDescription>
