@@ -15,7 +15,7 @@ const Login = () => {
       localStorage.setItem("userId", "22");
       navigate("/manager");
     } else if (email === "employee@oracle.com") {
-      localStorage.setItem("userId", "22");
+      localStorage.setItem("userId", "31");
       navigate("/employee");
     }
   };

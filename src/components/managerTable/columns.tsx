@@ -18,41 +18,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-
-export type Payment = {
-  id: string;
-  date: string;
-  name: string;
-  taskName: string;
-  status: "pending" | "In progress" | "completed" | "deleted";
-};
+import { TasksManager } from "@/lib/types";
 
 const statusIconMap = {
-  pending: <Clock className="text-yellow-500" />,
-  "In progress": <CircleEllipsis className="text-blue-500" />,
-  completed: <CheckCircle className="text-green-500" />,
-  deleted: <Trash2 className="text-red-500" />,
+  0: <Clock className="text-yellow-500" />,
+  1: <CircleEllipsis className="text-blue-500" />,
+  2: <CheckCircle className="text-green-500" />,
+  3: <Trash2 className="text-red-500" />,
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<TasksManager>[] = [
   {
-    accessorKey: "taskName",
+    accessorKey: "description",
     header: "Task Name",
   },
   {
-    accessorKey: "status",
+    accessorKey: "stateTask",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as keyof typeof statusIconMap;
+      const status = row.getValue("stateTask") as keyof typeof statusIconMap;
       return statusIconMap[status] || <XCircle />;
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "employeeName",
     header: "Employee Name",
   },
   {
-    accessorKey: "date",
+    accessorKey: "dueDate",
     header: "Due Date",
   },
   {
@@ -71,7 +64,9 @@ export const columns: ColumnDef<Payment>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() =>
+                navigator.clipboard.writeText(payment.id.toString())
+              }
             >
               Copy payment ID
             </DropdownMenuItem>

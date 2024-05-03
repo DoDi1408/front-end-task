@@ -5,6 +5,23 @@ import { Button } from "../components/ui/button";
 import axios from "axios";
 import { type Tasks } from "@/lib/types";
 
+/* const data: Tasks = [
+  {
+    id: 1212,
+    dueDate: "2 de Julio",
+    title: "Unit Tests",
+    description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum",
+    stateTask: 1,
+  },
+  {
+    id: 212,
+    dueDate: "5 de Julio",
+    title: "Create Pipeline",
+    description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum",
+    stateTask: 2,
+  },
+]; */
+
 import {
   Dialog,
   DialogContent,
@@ -22,8 +39,10 @@ const EmployeeDashboard = () => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/employee/22/tasks"
+        "https://api.romongo.uk/employee/31/tasks"
       );
+
+      console.log(response);
 
       setData(
         response.data.map((task: Tasks[number]) => ({
@@ -31,10 +50,8 @@ const EmployeeDashboard = () => {
           description: task?.description,
           stateTask: task?.stateTask,
           dueDate: task?.dueDate,
-          startDate: task?.startDate,
         }))
       );
-      console.log(response);
     } catch (error) {
       console.error(error);
     }

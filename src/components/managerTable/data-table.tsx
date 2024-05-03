@@ -24,11 +24,13 @@ import { Input } from "@/components/ui/input";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  employees: { value: string; label: string }[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  employees,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -59,7 +61,12 @@ export function DataTable<TData, TValue>({
         />
         <div className="flex items-center">
           <p className="font-bold me-3">Filter by employee</p>
-          <ComboboxDemo />
+          <ComboboxDemo
+            employees={employees}
+            setEmployee={(e: string) =>
+              table.getColumn("employeeName")?.setFilterValue(e)
+            }
+          />
         </div>
       </div>
       <div className="rounded-md border bg-white">
