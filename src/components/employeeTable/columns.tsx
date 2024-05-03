@@ -1,4 +1,4 @@
-// columns.tsx (remove useState and Dialog import)
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import {
@@ -17,6 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export type Payment = {
   id: string;
@@ -24,6 +30,7 @@ export type Payment = {
   taskName: string;
   status: "pending" | "In progress" | "completed" | "deleted";
   description?: string;
+  isCompleted?: boolean;
 };
 
 const statusIconMap = {
@@ -32,6 +39,49 @@ const statusIconMap = {
   completed: <CheckCircle className="text-green-500" />,
   deleted: <Trash2 className="text-red-500" />,
 };
+
+function ConfirmationCheckboxCell({ row }: { row: { original: Payment } }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [taskComplete, setTaskComplete] = useState(
+    row.original.isCompleted || false
+  );
+
+  const completeTask = () => {
+    row.original.isCompleted = true;
+    setTaskComplete(true);
+    setConfirmOpen(false);
+  };
+
+  return (
+    <>
+      <Checkbox
+        checked={taskComplete}
+        onCheckedChange={() => {
+          if (!taskComplete) setConfirmOpen(true);
+        }}
+        aria-label="Complete task"
+        disabled={taskComplete}
+      />
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure this task is complete?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-x-20 mt-4">
+              <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+                Back to table
+              </Button>
+              <Button variant="default" onClick={completeTask}>
+                Yes, I'm sure
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export const columns: ColumnDef<Payment>[] = [
   {
@@ -43,13 +93,7 @@ export const columns: ColumnDef<Payment>[] = [
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    cell: ConfirmationCheckboxCell,
     enableSorting: false,
     enableHiding: false,
   },
