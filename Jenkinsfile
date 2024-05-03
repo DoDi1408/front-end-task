@@ -33,6 +33,7 @@ pipeline {
             steps{
                 script{
                     sh 'kubectl apply -f deployment-front.yaml'
+                    sh 'kubectl rollout restart deployment react-deployment'
                 }
             }
         }
