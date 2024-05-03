@@ -109,6 +109,15 @@ export const columns: ColumnDef<Tasks[number]>[] = [
   {
     accessorKey: "dueDate",
     header: "Due Date",
+    cell: ({ row }) => {
+      const dueDate = new Date(row.getValue<string>("dueDate"));
+      const formattedDate = dueDate.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      return formattedDate;
+    },
   },
   {
     id: "viewDescription",

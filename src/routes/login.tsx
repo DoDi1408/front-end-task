@@ -9,14 +9,32 @@ import logo from "../assets/logoimage.png";
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const login = () => {
+    if (!isValidEmail(email)) {
+      setError("Invalid, please try again.");
+      return;
+    }
+
     if (email === "manager@oracle.com") {
       localStorage.setItem("userId", "22");
       navigate("/manager");
     } else if (email === "employee@oracle.com") {
       localStorage.setItem("userId", "31");
       navigate("/employee");
+    } else {
+      setError("Invalid, please try again.");
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      login();
     }
   };
 
@@ -37,8 +55,13 @@ const Login = () => {
               type="email"
               id="email"
               placeholder="Email"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
+              onKeyPress={handleKeyPress}
             />
+            {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
           <Button className="bg-red-500" onClick={login}>
             Login
