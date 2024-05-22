@@ -49,7 +49,7 @@ const EmployeeDashboard = () => {
           id: task?.id,
           description: task?.description,
           stateTask: task?.stateTask,
-          dueDate: task?.dueDate,
+          dueDate: task?.dueDate.substring(0, 10),
         }))
       );
     } catch (error) {
