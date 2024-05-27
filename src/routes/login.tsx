@@ -39,8 +39,8 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-full">
-      <div className="bg-white flex flex-col w-3/5 h-2/5 items-center justify-center grid grid-cols-2 rounded-md">
+    <div className="flex justify-center items-center h-full mt-[-100px]">
+      <div className="bg-white flex flex-col w-3/5 h-2/5 items-center justify-center grid grid-cols-2 rounded-md shadow-2xl">
         <div className="text-center	bg-red-400 h-full w-full justify-center flex flex-col rounded-l-md">
           <p className="font-bold text-2xl text-white">Welcome!</p>
           <img src={logo} className="w-72 mt-6 mx-auto" />
