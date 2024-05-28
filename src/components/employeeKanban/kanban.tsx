@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, DragEvent } from "react";
+import { Dispatch, SetStateAction, useState, DragEvent } from "react";
 import { FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
