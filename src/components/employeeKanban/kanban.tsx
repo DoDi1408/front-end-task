@@ -24,7 +24,7 @@ const Board = () => {
         setCards={setCards}
       />
       <Column
-        title="TODO"
+        title="TO DO"
         column="todo"
         headingColor="text-blue-500"
         cards={cards}

@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import axios from "axios";
 
 import logo from "../assets/logoimage.png";
 
@@ -13,37 +15,87 @@ const Login = () => {
   const [telegramId, setTelegramId] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
   const login = async () => {
     if (!isValidEmail(email)) {
-      setError("Invalid, please try again.");
+      setError("Invalid format, please try again.");
       return;
     }
 
-    if (email === "manager@oracle.com") {
-      navigate("/manager");
-    } else if (email === "employee@oracle.com") {
-      navigate("/employee");
-    } else {
-      setError("Invalid role, please try again.");
+    try {
+      const response = await axios.post(
+        "https://api.romongo.uk/employee/login",
+        {
+          email,
+          password,
+        }
+      );
+      const { jwt, employeeType } = response.data;
+      localStorage.setItem("jwt", jwt);
+
+      if (employeeType === "manager") {
+        navigate("/manager");
+      } else if (employeeType === "employee") {
+        navigate("/employee");
+      } else {
+        setError("Invalid role, please try again.");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          setError("Login failed");
+        } else {
+          setError("Login failed: An unexpected error occurred.");
+        }
+      } else {
+        setError("Login failed: An unexpected error occurred.");
+      }
     }
   };
 
   const handleRegister = async () => {
     if (!isValidEmail(email)) {
-      setError("Invalid, please try again.");
+      setError("Invalid format, please try again.");
       return;
     }
 
-    if (email === "manager@oracle.com") {
-      navigate("/manager");
-    } else if (email === "employee@oracle.com") {
-      navigate("/employee");
-    } else {
-      setError("Invalid role, please try again.");
+    try {
+      const response = await axios.post(
+        "https://api.romongo.uk/employee/register",
+        {
+          email,
+          password,
+          telegramId,
+        }
+      );
+      const { jwt, employeeType } = response.data;
+      localStorage.setItem("jwt", jwt);
+
+      if (employeeType === "manager") {
+        navigate("/manager");
+      } else if (employeeType === "employee") {
+        navigate("/employee");
+      } else {
+        setError("Invalid role, please try again.");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          setError("Registration failed");
+        } else {
+          setError("Registration failed: An unexpected error occurred.");
+        }
+      } else {
+        setError("Registration failed: An unexpected error occurred.");
+      }
     }
   };
 
@@ -75,13 +127,22 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Label htmlFor="password" className="mb-1"></Label>
-                <Input
-                  type="password"
-                  id="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    type={passwordVisible ? "text" : "password"}
+                    id="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
                 <Label htmlFor="telegramId" className="mb-1"></Label>
                 <Input
                   type="text"
@@ -120,13 +181,22 @@ const Login = () => {
                   onKeyPress={(event) => event.key === "Enter" && login()}
                 />
                 <Label htmlFor="password" className="mb-1"></Label>
-                <Input
-                  type="password"
-                  id="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    type={passwordVisible ? "text" : "password"}
+                    id="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
                 {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
               </div>
               <div className="flex justify-between mt-4">
