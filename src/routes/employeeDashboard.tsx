@@ -48,18 +48,38 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const response = await axios
-        .get("https://api.romongo.uk/employee/31/tasks")
-        .catch(console.error);
-      if (response) {
-        setData(
-          response.data.map((task: Tasks[number]) => ({
-            id: task.id,
-            description: task.description,
-            stateTask: task.stateTask,
-            dueDate: task.dueDate.substring(0, 10),
-          }))
-        );
+      const token = localStorage.getItem("jwt");
+      if (token) {
+        const config = {
+          headers: { token: token },
+        };
+        try {
+          const response = await axios.get(
+            "https://api.romongo.uk/employee/tasks",
+            config
+          );
+          console.log("Data received:", response.data);
+          const newToken = response.headers["new-token"];
+          if (newToken) {
+            localStorage.setItem("jwt", newToken);
+          }
+          setData(
+            response.data.map((task: Tasks[number]) => ({
+              id: task.id,
+              title: task.title || "Untitled Task",
+              description: task.description,
+              stateTask: task.stateTask,
+              dueDate: task.dueDate.substring(0, 10),
+            }))
+          );
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error("Failed to fetch tasks:", error.message);
+            if (error.response) {
+              console.error("Error response data:", error.response.data);
+            }
+          }
+        }
       }
     };
     fetchTasks();
