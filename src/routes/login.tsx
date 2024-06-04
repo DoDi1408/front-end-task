@@ -106,6 +106,16 @@ const Login = () => {
     setTelegramId("");
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      if (isRegistering) {
+        handleRegister();
+      } else {
+        login();
+      }
+    }
+  };
+
   return (
     <div className="flex justify-center items-start h-screen bg-gradient-to-r from-red-50 via-white-50 to-sky-50 pt-[150px]">
       <div className="bg-white flex flex-col w-3/5 h-auto items-center justify-center grid grid-cols-2 rounded-md shadow-2xl">
@@ -124,6 +134,7 @@ const Login = () => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
                 />
                 <Label htmlFor="password" className="mb-1"></Label>
                 <div className="relative">
@@ -133,6 +144,7 @@ const Login = () => {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
                   />
                   <button
                     type="button"
@@ -149,6 +161,7 @@ const Login = () => {
                   placeholder="Telegram ID"
                   value={telegramId}
                   onChange={(e) => setTelegramId(e.target.value)}
+                  onKeyPress={handleKeyPress}
                 />
               </div>
               <div className="flex justify-between mt-4">
@@ -177,7 +190,7 @@ const Login = () => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onKeyPress={(event) => event.key === "Enter" && login()}
+                  onKeyPress={handleKeyPress}
                 />
                 <Label htmlFor="password" className="mb-1"></Label>
                 <div className="relative">
@@ -187,6 +200,7 @@ const Login = () => {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
                   />
                   <button
                     type="button"

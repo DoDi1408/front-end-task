@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 import Root from "./routes/root";
 import EmployeeDashboard from "./routes/employeeDashboard";
 import "./index.css";
@@ -8,6 +12,10 @@ import Login from "./routes/login";
 import ManagerDashboard from "./routes/managerDashboard";
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/login" />,
+  },
   {
     path: "/",
     element: <Root />,

@@ -40,19 +40,17 @@ const EmployeeDashboard = () => {
             "https://api.romongo.uk/employee/tasks",
             config
           );
-          console.log("Data received:", response.data);
           const newToken = response.headers["new-token"];
           if (newToken) {
             localStorage.setItem("jwt", newToken);
           }
           const formattedData = response.data.map((task: Tasks[number]) => ({
             id: task.id,
-            title: task.title || "Untitled Task",
+            title: task.title,
             description: task.description,
             stateTask: task.stateTask,
             dueDate: task.dueDate.substring(0, 10),
           }));
-          console.log("Formatted Data:", formattedData);
           setData(formattedData);
         } catch (error) {
           if (axios.isAxiosError(error)) {
