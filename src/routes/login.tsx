@@ -17,8 +17,7 @@ const Login = () => {
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email: string) => email.includes("@");
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);

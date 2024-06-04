@@ -28,8 +28,8 @@ import { Tasks } from "@/lib/types";
 
 const statusIconMap = {
   0: <CircleEllipsis className="text-blue-500" />, // Todo
-  1: <Clock className="text-yellow-500" />, // IN progress
-  2: <CheckCircle className="text-green-500" />, // completed
+  1: <Clock className="text-yellow-500" />, // In Progress
+  2: <CheckCircle className="text-green-500" />, // Completed
   3: <Trash2 className="text-red-500" />,
 };
 
@@ -42,13 +42,30 @@ function ConfirmationCheckboxCell({
   const taskComplete = row.original.stateTask === 2;
 
   const completeTask = async () => {
-    const res = await axios({
-      method: "put",
-      url: `https://api.romongo.uk/tasks/${row.original.id.toString()}/updateTask?state=2`,
-    });
+    const token = localStorage.getItem("jwt");
+    const task = {
+      id: row.original.id,
+      dueDate: row.original.dueDate,
+      description: row.original.description,
+      title: row.original.title,
+      stateTask: 2,
+    };
 
-    if (res.status == 200) {
-      window.location.reload();
+    try {
+      const res = await axios({
+        method: "put",
+        url: `https://api.romongo.uk/tasks/updateTask`,
+        headers: {
+          token: token || "",
+        },
+        data: task,
+      });
+
+      if (res.status === 200) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error);
     }
   };
 
@@ -98,8 +115,9 @@ export const columns: ColumnDef<Tasks[number]>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "description",
+    accessorKey: "title",
     header: "Task Name",
+    cell: ({ row }) => <span>{row.original.title}</span>,
   },
   {
     accessorKey: "stateTask",
@@ -125,6 +143,16 @@ export const columns: ColumnDef<Tasks[number]>[] = [
   {
     id: "viewDescription",
     header: "Description",
+    cell: ({ row }) => (
+      <Button
+        variant="outline"
+        onClick={() => {
+          console.log(row.original);
+        }}
+      >
+        View
+      </Button>
+    ),
   },
   {
     id: "actions",
@@ -144,11 +172,10 @@ export const columns: ColumnDef<Tasks[number]>[] = [
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(task.id.toString())}
             >
-              Copy payment ID
+              Copy task ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem>View task details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

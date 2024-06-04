@@ -5,24 +5,6 @@ import { CustomKanban } from "../components/employeeKanban/kanban";
 import { Button } from "../components/ui/button";
 import axios from "axios";
 import { type Tasks } from "@/lib/types";
-
-/* const data: Tasks = [
-  {
-    id: 1212,
-    dueDate: "2 de Julio",
-    title: "Unit Tests",
-    description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum",
-    stateTask: 1,
-  },
-  {
-    id: 212,
-    dueDate: "5 de Julio",
-    title: "Create Pipeline",
-    description: "Lorem Ipsum Lorem Ipsum Lorem Ipsum",
-    stateTask: 2,
-  },
-]; */
-
 import {
   Select,
   SelectContent,
@@ -43,7 +25,7 @@ import { ColumnDef } from "@tanstack/react-table";
 const EmployeeDashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Tasks[number] | null>(null);
-  const [data, setData] = useState<Tasks>();
+  const [data, setData] = useState<Tasks>([]);
   const [viewMode, setViewMode] = useState("table");
 
   useEffect(() => {
@@ -63,15 +45,15 @@ const EmployeeDashboard = () => {
           if (newToken) {
             localStorage.setItem("jwt", newToken);
           }
-          setData(
-            response.data.map((task: Tasks[number]) => ({
-              id: task.id,
-              title: task.title || "Untitled Task",
-              description: task.description,
-              stateTask: task.stateTask,
-              dueDate: task.dueDate.substring(0, 10),
-            }))
-          );
+          const formattedData = response.data.map((task: Tasks[number]) => ({
+            id: task.id,
+            title: task.title || "Untitled Task",
+            description: task.description,
+            stateTask: task.stateTask,
+            dueDate: task.dueDate.substring(0, 10),
+          }));
+          console.log("Formatted Data:", formattedData);
+          setData(formattedData);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error("Failed to fetch tasks:", error.message);
@@ -99,6 +81,8 @@ const EmployeeDashboard = () => {
           >
             View
           </Button>
+        ) : column.cell ? (
+          column.cell({ row })
         ) : null,
     })
   );
@@ -121,7 +105,7 @@ const EmployeeDashboard = () => {
       </div>
       <div className="container mx-auto py-5">
         {viewMode === "table" ? (
-          <DataTable columns={columnsWithDialog} data={data ?? []} />
+          <DataTable columns={columnsWithDialog} data={data} />
         ) : (
           <CustomKanban />
         )}
@@ -129,7 +113,7 @@ const EmployeeDashboard = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedTask?.description}</DialogTitle>
+            <DialogTitle>{selectedTask?.title}</DialogTitle>
             <DialogDescription>
               {selectedTask?.description || "No description available"}
             </DialogDescription>
