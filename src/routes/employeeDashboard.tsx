@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, CellContext } from "@tanstack/react-table";
 
 const EmployeeDashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -70,19 +70,19 @@ const EmployeeDashboard = () => {
   const columnsWithDialog: ColumnDef<Tasks[number]>[] = columns.map(
     (column) => ({
       ...column,
-      cell: ({ row }) =>
+      cell: (context: CellContext<Tasks[number], unknown>) =>
         column.id === "viewDescription" ? (
           <Button
             variant="outline"
             onClick={() => {
-              setSelectedTask(row.original);
+              setSelectedTask(context.row.original);
               setDialogOpen(true);
             }}
           >
             View
           </Button>
-        ) : column.cell ? (
-          column.cell({ row })
+        ) : typeof column.cell === "function" ? (
+          column.cell(context)
         ) : null,
     })
   );
