@@ -1,52 +1,184 @@
-import { Dispatch, SetStateAction, useState, DragEvent } from "react";
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  DragEvent,
+} from "react";
 import { FiTrash } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
+import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
+import { Tasks } from "@/lib/types";
 
-export const CustomKanban = () => {
+export const CustomKanban = ({ tasks }: { tasks: Tasks }) => {
   return (
     <div className="h-screen w-full bg-neutral-50 text-neutral-50">
-      <Board />
+      <Board tasks={tasks} />
     </div>
   );
 };
 
-const Board = () => {
-  const [cards, setCards] = useState(DEFAULT_CARDS);
+const Board = ({ tasks }: { tasks: Tasks }) => {
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    const formattedTasks = tasks.map((task) => ({
+      id: task.id.toString(),
+      title: task.title,
+      description: task.description,
+      dueDate: task.dueDate,
+      column: mapStateTaskToColumn(task.stateTask),
+    }));
+    setCards(formattedTasks);
+  }, [tasks]);
+
+  const handleCompleteConfirm = async () => {
+    if (!selectedCard) return;
+
+    const token = localStorage.getItem("jwt");
+    const task = {
+      id: selectedCard.id,
+      title: selectedCard.title,
+      description: selectedCard.description,
+      dueDate: selectedCard.dueDate,
+      stateTask: 2,
+    };
+
+    try {
+      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
+        headers: { token: token || "" },
+        withCredentials: true,
+      });
+      setCards((prevCards) =>
+        prevCards.map((card) =>
+          card.id === selectedCard.id ? { ...card, column: "done" } : card
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    } finally {
+      setConfirmOpen(false);
+      setSelectedCard(null);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedCard) return;
+
+    const token = localStorage.getItem("jwt");
+
+    try {
+      await axios.delete(`https://api.romongo.uk/tasks/${selectedCard.id}`, {
+        headers: { token: token || "" },
+      });
+      setCards((prevCards) =>
+        prevCards.filter((card) => card.id !== selectedCard.id)
+      );
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setSelectedCard(null);
+    }
+  };
 
   return (
-    <div className="flex h-full w-full gap-3 overflow-hidden p-12 bg-white shadow-md rounded-xl">
-      <Column
-        title="Backlog"
-        column="backlog"
-        headingColor="text-neutral-800"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="TO DO"
-        column="todo"
-        headingColor="text-blue-500"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="In progress"
-        column="doing"
-        headingColor="text-yellow-500"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="Complete"
-        column="done"
-        headingColor="text-green-500"
-        cards={cards}
-        setCards={setCards}
-      />
-      <BurnBarrel setCards={setCards} />
-    </div>
+    <>
+      <div className="flex h-full w-full gap-3 overflow-hidden p-12 bg-white shadow-md rounded-xl">
+        <Column
+          title="TO DO"
+          column="todo"
+          headingColor="text-blue-500"
+          cards={cards}
+          setCards={setCards}
+        />
+        <Column
+          title="In progress"
+          column="doing"
+          headingColor="text-yellow-500"
+          cards={cards}
+          setCards={setCards}
+        />
+        <Column
+          title="Complete"
+          column="done"
+          headingColor="text-green-500"
+          cards={cards}
+          setCards={setCards}
+          setConfirmOpen={setConfirmOpen}
+          setSelectedCard={setSelectedCard}
+        />
+        <BurnBarrel
+          cards={cards}
+          setSelectedCard={setSelectedCard}
+          setDeleteConfirmOpen={setDeleteConfirmOpen}
+        />
+      </div>
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure this task is complete?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-x-20 mt-4">
+              <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="default" onClick={handleCompleteConfirm}>
+                Yes, I'm sure
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Are you sure you want to delete this task?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-x-20 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="default" onClick={handleDeleteConfirm}>
+                Yes, delete it
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
+};
+
+const mapStateTaskToColumn = (stateTask: number): ColumnType => {
+  switch (stateTask) {
+    case 0:
+      return "todo";
+    case 1:
+      return "doing";
+    case 2:
+      return "done";
+    default:
+      return "todo";
+  }
 };
 
 type ColumnProps = {
@@ -55,6 +187,8 @@ type ColumnProps = {
   cards: CardType[];
   column: ColumnType;
   setCards: Dispatch<SetStateAction<CardType[]>>;
+  setConfirmOpen?: Dispatch<SetStateAction<boolean>>;
+  setSelectedCard?: Dispatch<SetStateAction<CardType | null>>;
 };
 
 const Column = ({
@@ -63,6 +197,8 @@ const Column = ({
   cards,
   column,
   setCards,
+  setConfirmOpen,
+  setSelectedCard,
 }: ColumnProps) => {
   const [active, setActive] = useState(false);
 
@@ -70,7 +206,7 @@ const Column = ({
     e.dataTransfer.setData("cardId", card.id);
   };
 
-  const handleDragEnd = (e: DragEvent) => {
+  const handleDragEnd = async (e: DragEvent) => {
     const cardId = e.dataTransfer.getData("cardId");
     setActive(false);
 
@@ -80,9 +216,34 @@ const Column = ({
     );
     if (draggedCardIndex === -1) return;
 
-    updatedCards[draggedCardIndex].column = column;
+    const targetColumn = column;
 
-    setCards(updatedCards);
+    if (targetColumn === "done" && setConfirmOpen && setSelectedCard) {
+      setSelectedCard(updatedCards[draggedCardIndex]);
+      setConfirmOpen(true);
+      return;
+    }
+
+    updatedCards[draggedCardIndex].column = targetColumn;
+
+    const token = localStorage.getItem("jwt");
+    const updatedTask = updatedCards[draggedCardIndex];
+    const task = {
+      id: updatedTask.id,
+      title: updatedTask.title,
+      description: updatedTask.description,
+      dueDate: updatedTask.dueDate,
+      stateTask: mapColumnToStateTask(updatedTask.column),
+    };
+
+    try {
+      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
+        headers: { token: token || "" },
+      });
+      setCards(updatedCards);
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
   };
 
   const handleDragOver = (e: DragEvent) => {
@@ -133,11 +294,31 @@ const Column = ({
   );
 };
 
+const mapColumnToStateTask = (column: ColumnType): number => {
+  switch (column) {
+    case "todo":
+      return 0;
+    case "doing":
+      return 1;
+    case "done":
+      return 2;
+    default:
+      return 0;
+  }
+};
+
 type CardProps = CardType & {
   handleDragStart: Function;
 };
 
-const Card = ({ title, id, column, handleDragStart }: CardProps) => {
+const Card = ({
+  title,
+  id,
+  column,
+  description,
+  dueDate,
+  handleDragStart,
+}: CardProps) => {
   return (
     <>
       <DropIndicator beforeId={id} column={column} />
@@ -145,7 +326,9 @@ const Card = ({ title, id, column, handleDragStart }: CardProps) => {
         layout
         layoutId={id}
         draggable="true"
-        onDragStart={(e) => handleDragStart(e, { title, id, column })}
+        onDragStart={(e) =>
+          handleDragStart(e, { title, id, column, description, dueDate })
+        }
         className="cursor-grab rounded border border-neutral-300 bg-white p-3 active:cursor-grabbing"
         style={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}
       >
@@ -171,9 +354,13 @@ const DropIndicator = ({ beforeId, column }: DropIndicatorProps) => {
 };
 
 const BurnBarrel = ({
-  setCards,
+  cards,
+  setSelectedCard,
+  setDeleteConfirmOpen,
 }: {
-  setCards: Dispatch<SetStateAction<CardType[]>>;
+  cards: CardType[];
+  setSelectedCard: Dispatch<SetStateAction<CardType | null>>;
+  setDeleteConfirmOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [active, setActive] = useState(false);
 
@@ -189,8 +376,9 @@ const BurnBarrel = ({
   const handleDragEnd = (e: DragEvent) => {
     const cardId = e.dataTransfer.getData("cardId");
 
-    setCards((pv) => pv.filter((c) => c.id !== cardId));
-
+    const cardToDelete = cards.find((c) => c.id === cardId) || null;
+    setSelectedCard(cardToDelete);
+    setDeleteConfirmOpen(true);
     setActive(false);
   };
 
@@ -210,40 +398,12 @@ const BurnBarrel = ({
   );
 };
 
-type ColumnType = "backlog" | "todo" | "doing" | "done";
+type ColumnType = "todo" | "doing" | "done";
 
 type CardType = {
   title: string;
   id: string;
+  description: string;
+  dueDate: string;
   column: ColumnType;
 };
-
-const DEFAULT_CARDS: CardType[] = [
-  // BACKLOG
-  { title: "Look into render bug in dashboard", id: "1", column: "backlog" },
-  { title: "SOX compliance checklist", id: "2", column: "backlog" },
-  { title: "[SPIKE] Migrate to Azure", id: "3", column: "backlog" },
-  { title: "Document Notifications service", id: "4", column: "backlog" },
-  // TODO
-  {
-    title: "Research DB options for new microservice",
-    id: "5",
-    column: "todo",
-  },
-  { title: "Postmortem for outage", id: "6", column: "todo" },
-  { title: "Sync with product on Q3 roadmap", id: "7", column: "todo" },
-
-  // DOING
-  {
-    title: "Refactor context providers to use Zustand",
-    id: "8",
-    column: "doing",
-  },
-  { title: "Add logging to daily CRON", id: "9", column: "doing" },
-  // DONE
-  {
-    title: "Set up DD dashboards for Lambda listener",
-    id: "10",
-    column: "done",
-  },
-];

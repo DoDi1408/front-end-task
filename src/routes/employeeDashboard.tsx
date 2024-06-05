@@ -105,7 +105,7 @@ const EmployeeDashboard = () => {
         {viewMode === "table" ? (
           <DataTable columns={columnsWithDialog} data={data} />
         ) : (
-          <CustomKanban />
+          <CustomKanban tasks={data} />
         )}
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
