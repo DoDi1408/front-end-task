@@ -9,7 +9,7 @@ const statusIconMap = {
   0: <CircleEllipsis className="text-blue-500" />, // Todo
   1: <Clock className="text-yellow-500" />, // In Progress
   2: <CheckCircle className="text-green-500" />, // Completed
-  3: <Trash2 className="text-red-500" />,
+  3: <Trash2 className="text-red-500" />, // Deleted
 };
 
 export const columns: ColumnDef<Tasks[number]>[] = [
