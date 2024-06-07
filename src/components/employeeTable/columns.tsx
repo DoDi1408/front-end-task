@@ -103,13 +103,7 @@ function ConfirmationCheckboxCell({
 export const columns: ColumnDef<Tasks[number]>[] = [
   {
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
+    header: () => null,
     cell: ConfirmationCheckboxCell,
     enableSorting: false,
     enableHiding: false,
@@ -159,6 +153,21 @@ export const columns: ColumnDef<Tasks[number]>[] = [
     cell: ({ row }) => {
       const task = row.original;
 
+      const deleteTask = async () => {
+        const token = localStorage.getItem("jwt");
+        try {
+          await axios.delete(
+            `https://api.romongo.uk/tasks/deleteTask/${task.id}`,
+            {
+              headers: { token: token || "" },
+            }
+          );
+          window.location.reload();
+        } catch (error) {
+          console.error("Failed to delete task:", error);
+        }
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -175,7 +184,12 @@ export const columns: ColumnDef<Tasks[number]>[] = [
               Copy task ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View task details</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-red-600 bg-red-100 hover:bg-red-200"
+              onClick={deleteTask}
+            >
+              <Trash2 className="mr-2 text-red-600" /> Delete task
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -20,7 +20,7 @@ import { Tasks } from "@/lib/types";
 
 export const CustomKanban = ({ tasks }: { tasks: Tasks }) => {
   return (
-    <div className="h-screen w-full bg-neutral-50 text-neutral-50">
+    <div className="h-screen w-full bg-[#F4F3F2] text-neutral-50 flex justify-center items-center p-4">
       <Board tasks={tasks} />
     </div>
   );
@@ -58,6 +58,7 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     try {
       await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
         headers: { token: token || "" },
+        withCredentials: true,
       });
       setCards((prevCards) =>
         prevCards.map((card) =>
@@ -109,7 +110,7 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
 
   return (
     <>
-      <div className="flex h-full w-full gap-3 overflow-hidden p-12 bg-white shadow-md rounded-xl">
+      <div className="flex h-full w-full max-w-screen-lg gap-4 overflow-hidden p-6 bg-white shadow-lg rounded-xl">
         <Column
           title="TO DO"
           column="todo"
@@ -275,14 +276,14 @@ const Column = ({
 
   return (
     <div
-      className={`flex flex-col w-56 border border-neutral-300 rounded-md shadow-md ${
+      className={`flex flex-col w-48 border border-neutral-300 rounded-md shadow-md ${
         active ? "bg-neutral-300/50" : "bg-neutral-100"
       }`}
       style={{ minHeight: `${minHeight}px` }}
     >
       <div className="p-2 flex items-center justify-between bg-neutral-100 rounded-t-md">
         <h3 className={`font-medium ${headingColor}`}>{title}</h3>
-        <span className="rounded text-sm text-neutral-800">
+        <span className="rounded bg-blue-100 text-blue-600 px-2 py-0.5 text-xs font-semibold">
           {filteredCards.length}
         </span>
       </div>
@@ -343,8 +344,7 @@ const Card = ({
         onDragStart={(e) =>
           handleDragStart(e, { title, id, column, description, dueDate })
         }
-        className="cursor-grab rounded border border-neutral-300 bg-white p-3 active:cursor-grabbing"
-        style={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}
+        className="cursor-grab rounded border border-neutral-300 bg-white p-2 active:cursor-grabbing shadow-lg"
       >
         <p className="text-sm text-neutral-800">{title}</p>
       </motion.div>
@@ -403,8 +403,8 @@ const BurnBarrel = ({
       onDragLeave={handleDragLeave}
       className={`mt-10 grid h-56 w-56 place-content-center rounded border text-3xl ${
         active
-          ? "border-red-800 bg-red-800/20 text-red-500"
-          : "border-neutral-500 bg-neutral-500/20 text-neutral-500"
+          ? "border-red-200 bg-red-200 text-red-500"
+          : "border-red-400 bg-red-200 text-neutral-500"
       }`}
     >
       {active ? <FaFire className="animate-bounce" /> : <FiTrash />}
