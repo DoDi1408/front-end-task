@@ -58,7 +58,6 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     try {
       await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
         headers: { token: token || "" },
-        withCredentials: true,
       });
       setCards((prevCards) =>
         prevCards.map((card) =>
@@ -77,11 +76,26 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     if (!selectedCard) return;
 
     const token = localStorage.getItem("jwt");
+    const task = {
+      id: selectedCard.id,
+      title: selectedCard.title,
+      description: selectedCard.description,
+      dueDate: selectedCard.dueDate,
+      stateTask: 3,
+    };
 
     try {
-      await axios.delete(`https://api.romongo.uk/tasks/${selectedCard.id}`, {
+      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
         headers: { token: token || "" },
       });
+
+      await axios.delete(
+        `https://api.romongo.uk/tasks/deleteTask/${selectedCard.id}`,
+        {
+          headers: { token: token || "" },
+        }
+      );
+
       setCards((prevCards) =>
         prevCards.filter((card) => card.id !== selectedCard.id)
       );
