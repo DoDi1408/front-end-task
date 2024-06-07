@@ -43,7 +43,7 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     setCards(formattedTasks);
   }, [tasks]);
 
-  const handleCompleteConfirm = async () => {
+  const completeTask = async () => {
     if (!selectedCard) return;
 
     const token = localStorage.getItem("jwt");
@@ -58,8 +58,8 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     try {
       await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
         headers: { token: token || "" },
-        withCredentials: true,
       });
+
       setCards((prevCards) =>
         prevCards.map((card) =>
           card.id === selectedCard.id ? { ...card, column: "done" } : card
@@ -150,7 +150,7 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
               <Button variant="outline" onClick={() => setConfirmOpen(false)}>
                 Cancel
               </Button>
-              <Button variant="default" onClick={handleCompleteConfirm}>
+              <Button variant="default" onClick={completeTask}>
                 Yes, I'm sure
               </Button>
             </div>
@@ -194,6 +194,18 @@ const mapStateTaskToColumn = (stateTask: number): ColumnType => {
     default:
       return "todo";
   }
+};
+
+const columnBackgroundColors = {
+  todo: "bg-blue-100",
+  doing: "bg-yellow-100",
+  done: "bg-green-100",
+};
+
+const columnHeaderColors = {
+  todo: "bg-blue-500",
+  doing: "bg-yellow-500",
+  done: "bg-green-500",
 };
 
 type ColumnProps = {
@@ -255,6 +267,7 @@ const Column = ({
       await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
         headers: { token: token || "" },
       });
+
       setCards(updatedCards);
     } catch (error) {
       console.error("Failed to update task:", error);
@@ -281,7 +294,9 @@ const Column = ({
       }`}
       style={{ minHeight: `${minHeight}px` }}
     >
-      <div className="p-2 flex items-center justify-between bg-neutral-100 rounded-t-md">
+      <div
+        className={`p-2 flex items-center justify-between rounded-t-md ${columnBackgroundColors[column]}`}
+      >
         <h3 className={`font-medium ${headingColor}`}>{title}</h3>
         <span className="rounded bg-blue-100 text-blue-600 px-2 py-0.5 text-xs font-semibold">
           {filteredCards.length}
@@ -323,7 +338,7 @@ const mapColumnToStateTask = (column: ColumnType): number => {
 };
 
 type CardProps = CardType & {
-  handleDragStart: Function;
+  handleDragStart: (e: DragEvent, card: CardType) => void;
 };
 
 const Card = ({
@@ -334,20 +349,24 @@ const Card = ({
   dueDate,
   handleDragStart,
 }: CardProps) => {
+  const onDragStart = (e: DragEvent) =>
+    handleDragStart(e, { title, id, column, description, dueDate });
+
   return (
     <>
       <DropIndicator beforeId={id} column={column} />
-      <motion.div
-        layout
-        layoutId={id}
-        draggable="true"
-        onDragStart={(e) =>
-          handleDragStart(e, { title, id, column, description, dueDate })
-        }
-        className="cursor-grab rounded border border-neutral-300 bg-white p-2 active:cursor-grabbing shadow-lg"
-      >
-        <p className="text-sm text-neutral-800">{title}</p>
-      </motion.div>
+      <div draggable="true" onDragStart={onDragStart}>
+        <motion.div
+          layout
+          layoutId={id}
+          className="cursor-grab rounded border border-neutral-300 bg-white p-2 active:cursor-grabbing shadow-lg"
+        >
+          <div
+            className={`h-1 w-full ${columnHeaderColors[column]} mb-2`}
+          ></div>
+          <p className="text-sm text-neutral-800">{title}</p>
+        </motion.div>
+      </div>
     </>
   );
 };
