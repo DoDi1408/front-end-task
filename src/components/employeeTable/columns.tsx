@@ -37,7 +37,7 @@ export const columns: ColumnDef<Tasks[number]>[] = [
     accessorKey: "dueDate",
     header: "Due Date",
     cell: ({ row }) => {
-      const dueDate = new Date(row.getValue<string>("dueDate"));
+      const dueDate = new Date(row.getValue<string>("dueDate") + "T00:00:00");
       const formattedDate = dueDate.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "long",
