@@ -14,9 +14,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 import { Button } from "../ui/button";
-import { Tasks } from "@/lib/types";
+import { Tasks } from "../../lib/types";
 
 export const CustomKanban = ({ tasks }: { tasks: Tasks }) => {
   return (
@@ -183,7 +183,7 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
   );
 };
 
-const mapStateTaskToColumn = (stateTask: number): ColumnType => {
+export const mapStateTaskToColumn = (stateTask: number): ColumnType => {
   switch (stateTask) {
     case 0:
       return "todo";
