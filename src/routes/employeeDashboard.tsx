@@ -28,40 +28,41 @@ const EmployeeDashboard = () => {
   const [data, setData] = useState<Tasks>([]);
   const [viewMode, setViewMode] = useState("table");
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const token = localStorage.getItem("jwt");
-      if (token) {
-        const config = {
-          headers: { token: token },
-        };
-        try {
-          const response = await axios.get(
-            "https://api.romongo.uk/employee/tasks",
-            config
-          );
-          const newToken = response.headers["new-token"];
-          if (newToken) {
-            localStorage.setItem("jwt", newToken);
-          }
-          const formattedData = response.data.map((task: Tasks[number]) => ({
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            stateTask: task.stateTask,
-            dueDate: task.dueDate.substring(0, 10),
-          }));
-          setData(formattedData);
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            console.error("Failed to fetch tasks:", error.message);
-            if (error.response) {
-              console.error("Error response data:", error.response.data);
-            }
+  const fetchTasks = async () => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      const config = {
+        headers: { token: token },
+      };
+      try {
+        const response = await axios.get(
+          "https://api.romongo.uk/employee/tasks",
+          config
+        );
+        const newToken = response.headers["new-token"];
+        if (newToken) {
+          localStorage.setItem("jwt", newToken);
+        }
+        const formattedData = response.data.map((task: Tasks[number]) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          stateTask: task.stateTask,
+          dueDate: task.dueDate.substring(0, 10),
+        }));
+        setData(formattedData);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error("Failed to fetch tasks:", error.message);
+          if (error.response) {
+            console.error("Error response data:", error.response.data);
           }
         }
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchTasks();
   }, []);
 
@@ -105,7 +106,7 @@ const EmployeeDashboard = () => {
         {viewMode === "table" ? (
           <DataTable columns={columnsWithDialog} data={data} />
         ) : (
-          <CustomKanban tasks={data} />
+          <CustomKanban tasks={data} setTasks={setData} />
         )}
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

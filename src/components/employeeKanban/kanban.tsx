@@ -18,15 +18,27 @@ import {
 import { Button } from "../ui/button";
 import { Tasks } from "../../lib/types";
 
-export const CustomKanban = ({ tasks }: { tasks: Tasks }) => {
+export const CustomKanban = ({
+  tasks,
+  setTasks,
+}: {
+  tasks: Tasks;
+  setTasks: Dispatch<SetStateAction<Tasks>>;
+}) => {
   return (
     <div className="h-screen w-full bg-[#F4F3F2] text-neutral-50 flex justify-center items-center p-4">
-      <Board tasks={tasks} />
+      <Board tasks={tasks} setTasks={setTasks} />
     </div>
   );
 };
 
-const Board = ({ tasks }: { tasks: Tasks }) => {
+const Board = ({
+  tasks,
+  setTasks,
+}: {
+  tasks: Tasks;
+  setTasks: Dispatch<SetStateAction<Tasks>>;
+}) => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
@@ -60,6 +72,14 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
         headers: { token: token || "" },
       });
 
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === parseInt(selectedCard.id)
+            ? { ...task, stateTask: 2 }
+            : task
+        )
+      );
+
       setCards((prevCards) =>
         prevCards.map((card) =>
           card.id === selectedCard.id ? { ...card, column: "done" } : card
@@ -77,24 +97,17 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     if (!selectedCard) return;
 
     const token = localStorage.getItem("jwt");
-    const task = {
-      id: selectedCard.id,
-      title: selectedCard.title,
-      description: selectedCard.description,
-      dueDate: selectedCard.dueDate,
-      stateTask: 3,
-    };
 
     try {
-      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
-        headers: { token: token || "" },
-      });
-
       await axios.delete(
         `https://api.romongo.uk/tasks/deleteTask/${selectedCard.id}`,
         {
           headers: { token: token || "" },
         }
+      );
+
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task.id !== parseInt(selectedCard.id))
       );
 
       setCards((prevCards) =>
@@ -108,6 +121,49 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
     }
   };
 
+  const handleDragEnd = async (e: DragEvent, targetColumn: ColumnType) => {
+    const cardId = e.dataTransfer.getData("cardId");
+
+    const updatedCards = [...cards];
+    const draggedCardIndex = updatedCards.findIndex(
+      (card) => card.id === cardId
+    );
+    if (draggedCardIndex === -1) return;
+
+    if (targetColumn === "done") {
+      setSelectedCard(updatedCards[draggedCardIndex]);
+      setConfirmOpen(true);
+      return;
+    }
+
+    updatedCards[draggedCardIndex].column = targetColumn;
+
+    const token = localStorage.getItem("jwt");
+    const updatedTask = updatedCards[draggedCardIndex];
+    const task = {
+      id: updatedTask.id,
+      title: updatedTask.title,
+      description: updatedTask.description,
+      dueDate: updatedTask.dueDate,
+      stateTask: mapColumnToStateTask(updatedTask.column),
+    };
+
+    try {
+      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
+        headers: { token: token || "" },
+      });
+
+      setCards(updatedCards);
+      setTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          t.id === parseInt(task.id) ? { ...t, stateTask: task.stateTask } : t
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
+  };
+
   return (
     <>
       <div className="flex h-full w-full max-w-screen-lg gap-4 overflow-hidden p-6 bg-white shadow-lg rounded-xl">
@@ -116,21 +172,21 @@ const Board = ({ tasks }: { tasks: Tasks }) => {
           column="todo"
           headingColor="text-blue-500"
           cards={cards}
-          setCards={setCards}
+          handleDragEnd={handleDragEnd}
         />
         <Column
           title="In progress"
           column="doing"
           headingColor="text-yellow-500"
           cards={cards}
-          setCards={setCards}
+          handleDragEnd={handleDragEnd}
         />
         <Column
           title="Complete"
           column="done"
           headingColor="text-green-500"
           cards={cards}
-          setCards={setCards}
+          handleDragEnd={handleDragEnd}
           setConfirmOpen={setConfirmOpen}
           setSelectedCard={setSelectedCard}
         />
@@ -213,7 +269,7 @@ type ColumnProps = {
   headingColor: string;
   cards: CardType[];
   column: ColumnType;
-  setCards: Dispatch<SetStateAction<CardType[]>>;
+  handleDragEnd: (e: DragEvent, column: ColumnType) => void;
   setConfirmOpen?: Dispatch<SetStateAction<boolean>>;
   setSelectedCard?: Dispatch<SetStateAction<CardType | null>>;
 };
@@ -223,9 +279,7 @@ const Column = ({
   headingColor,
   cards,
   column,
-  setCards,
-  setConfirmOpen,
-  setSelectedCard,
+  handleDragEnd,
 }: ColumnProps) => {
   const [active, setActive] = useState(false);
 
@@ -233,46 +287,7 @@ const Column = ({
     e.dataTransfer.setData("cardId", card.id);
   };
 
-  const handleDragEnd = async (e: DragEvent) => {
-    const cardId = e.dataTransfer.getData("cardId");
-    setActive(false);
-
-    const updatedCards = [...cards];
-    const draggedCardIndex = updatedCards.findIndex(
-      (card) => card.id === cardId
-    );
-    if (draggedCardIndex === -1) return;
-
-    const targetColumn = column;
-
-    if (targetColumn === "done" && setConfirmOpen && setSelectedCard) {
-      setSelectedCard(updatedCards[draggedCardIndex]);
-      setConfirmOpen(true);
-      return;
-    }
-
-    updatedCards[draggedCardIndex].column = targetColumn;
-
-    const token = localStorage.getItem("jwt");
-    const updatedTask = updatedCards[draggedCardIndex];
-    const task = {
-      id: updatedTask.id,
-      title: updatedTask.title,
-      description: updatedTask.description,
-      dueDate: updatedTask.dueDate,
-      stateTask: mapColumnToStateTask(updatedTask.column),
-    };
-
-    try {
-      await axios.put("https://api.romongo.uk/tasks/updateTask", task, {
-        headers: { token: token || "" },
-      });
-
-      setCards(updatedCards);
-    } catch (error) {
-      console.error("Failed to update task:", error);
-    }
-  };
+  const onDragEnd = (e: DragEvent) => handleDragEnd(e, column);
 
   const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -293,6 +308,9 @@ const Column = ({
         active ? "bg-neutral-300/50" : "bg-neutral-100"
       }`}
       style={{ minHeight: `${minHeight}px` }}
+      onDrop={onDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
     >
       <div
         className={`p-2 flex items-center justify-between rounded-t-md ${columnBackgroundColors[column]}`}
@@ -302,12 +320,7 @@ const Column = ({
           {filteredCards.length}
         </span>
       </div>
-      <div
-        onDrop={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className="flex-1 p-2 transition-colors overflow-auto"
-      >
+      <div className="flex-1 p-2 transition-colors overflow-auto">
         {filteredCards.length === 0 && (
           <div
             className="text-center text-neutral-400"
