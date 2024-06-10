@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
-
 import logo from "../assets/logoimage.png";
 
 const Login = () => {
@@ -234,6 +233,34 @@ const Login = () => {
             </>
           )}
         </div>
+      </div>
+      <div className="fixed bottom-4 right-4 text-sm text-gray-500">
+        <a
+          href="https://www.privacypolicies.com/live/ec6ec2c8-30ab-4e29-93cc-5ac773f10438"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          Privacy Policy
+        </a>
+        {" • "}
+        <a
+          href="https://www.privacypolicies.com/live/eab6d474-41bf-4c5b-960e-353f36988736"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          Terms and Conditions
+        </a>
+        {" • "}
+        <a
+          href="https://www.privacypolicies.com/live/c04dc28c-a2ae-4598-9d2b-99d0eeaf2388"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          EULA
+        </a>
       </div>
     </div>
   );
