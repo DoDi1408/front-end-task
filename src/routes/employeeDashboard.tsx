@@ -3,7 +3,7 @@ import { DataTable } from "../components/employeeTable/data-table";
 import { columns } from "../components/employeeTable/columns";
 import { CustomKanban } from "../components/employeeKanban/kanban";
 import { Button } from "../components/ui/button";
-import axios from "axios";
+import  axios, { AxiosInstance }  from 'axios'; 
 import { type Tasks } from "@/lib/types";
 import {
   Select,
@@ -22,7 +22,11 @@ import {
 } from "@/components/ui/dialog";
 import { ColumnDef, CellContext } from "@tanstack/react-table";
 
-const EmployeeDashboard = () => {
+interface EmployeeDashboardProps {
+  axiosInstance?: AxiosInstance; // Define prop interface with AxiosInstance type
+}
+
+const EmployeeDashboard: React.FC<EmployeeDashboardProps>  = ({ axiosInstance = axios }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Tasks[number] | null>(null);
   const [data, setData] = useState<Tasks>([]);
@@ -36,7 +40,7 @@ const EmployeeDashboard = () => {
           headers: { token: token },
         };
         try {
-          const response = await axios.get(
+          const response = await axiosInstance.get(
             "https://api.romongo.uk/employee/tasks",
             config
           );
@@ -65,7 +69,7 @@ const EmployeeDashboard = () => {
     fetchTasks();
   }, []);
 
-  const columnsWithDialog: ColumnDef<Tasks[number]>[] = columns.map(
+   const columnsWithDialog: ColumnDef<Tasks[number]>[] = columns.map(
     (column) => ({
       ...column,
       cell: (context: CellContext<Tasks[number], unknown>) =>
